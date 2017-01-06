@@ -190,9 +190,9 @@ class RequestManager {
 RequestManager.actionTrackerReducer = (actionsNotToTrack) => (state, action) => {
   // Ignore init actions
   if (!_.some(['@', ...actionsNotToTrack], t => action.type.includes(t))) {
-    new RM().writeLogFromAction(action);
+    new RequestManager().writeLogFromAction(action);
   }
-  return 'This reducer if for tracking alone and does not return viable data.';
+  return 'This reducer is for tracking alone and does not return viable data.';
 };
 
 export default RequestManager;

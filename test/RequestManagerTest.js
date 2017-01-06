@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { describe, context } from 'ava-describe';
 import { jsdom } from 'jsdom';
 import { CALL_API } from 'redux-api-middleware';
@@ -235,6 +236,24 @@ describe('RequestManager', {
           'INTERNALACTION--KIWIS--WHATEVER_WHATEVER2--time4'
         ].sort()
       );
+    }
+  },
+
+  actionTrackerReducer: {
+    generatesAFunctionThatActsAsATrackingReducer: t => {
+      resetWindowLogger();
+      const reducer = RequestManager.actionTrackerReducer(['IGNORE']);
+      const returnVal = reducer('irrelevant', { type: 'GOOD', value: 'VALUE', value2: 'value2', now: 'time' });
+
+      t.is(returnVal, 'This reducer is for tracking alone and does not return viable data.'); // Ignores state
+
+      const logsAfterFirst = window.actionLogs;
+      t.is(_.get(window.actionLogs, 'GLOBAL.GOOD.VALUE_VALUE2'), 'time')
+
+      reducer('irrelevant', { type: 'IGNORE_REQUEST', value: 'VALUE', value2: 'value2', now: 'time2' });
+
+      t.is(_.get(window.actionLogs, 'GLOBAL.IGNORE_REQUEST.VALUE_VALUE2'), undefined);
+      t.deepEqual(logsAfterFirst, window.actionLogs);
     }
   }
 });
