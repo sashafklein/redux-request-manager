@@ -187,12 +187,13 @@ class RequestManager {
   }
 }
 
-RequestManager.actionTrackerReducer = (actionsNotToTrack = []) => (_, action) => {
+RequestManager.actionTrackerReducer = (actionsNotToTrack) => (state, action) => {
   // Ignore init actions
-  if (['@', ...actionsNotToTrack].filter(t => action.type.indexOf(t) === -1).length === 0) {
-    new RequestManager().writeLogFromAction(action);
+  if (_.any(['@', ...actionsNotToTrack], t => action.type.includes(t))) {
+    return null;
   }
+  new RM().writeLogFromAction(action);
   return null;
-}
+};
 
 export default RequestManager;
