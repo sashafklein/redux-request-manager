@@ -1,8 +1,12 @@
 # Redux Request Manager
 
-Attaches a lightweight object to window which tracks request history as a tree and provides a simple interface for tracking actions going out through redux-api-middleware or internally. Event timestamps are stored as ISO strings, and ID (or 'GLOBAL') as well as action argument values, are nested in the tree, which looks something like this:
+Attaches a lightweight object to window which tracks request history as a tree and provides a simple interface for tracking actions going out through redux-api-middleware or internally.
 
-```
+> Event timestamps are stored as ISO strings, and request ids (or, if none exist, 'GLOBAL') as well as action argument values are nested in the tree.
+
+An example `window.actionLogs` object looks something like this:
+
+```json
  {
    "46": {
      "SOME_ACTION": {
@@ -24,6 +28,10 @@ Attaches a lightweight object to window which tracks request history as a tree a
  }
 ```
 
+After the first request has been made with the manager, this object should be universally accessible, and all instances of the request manager will save to and perform checks on this global tree.
+
+> This is obviously inherently insecure. If any of the information in an action is insecure, don't use it for those actions and ignore those actions in the reducer function. However, since this mostly just stores times of requests, the information is generally not a risk to expose.
+
 ## Getting started
 
 ```
@@ -34,7 +42,7 @@ npm install --save redux-request-manager
 
 Add this to your reducers file:
 
-```
+```js
 import RequestManager from 'redux-request-manager';
 
 // ...
@@ -49,7 +57,7 @@ This will add a reducer function which tracks every action that hits your store 
 
 Unfortunately, there can be a bit of a delay for the action to hit the store and come back to your component, so if you need to throttle or stop dispatches (say, to a slow API), you'll also want to dispatch using the request manager, like so:
 
-```
+```jsx
 import { connect } from 'react-redux';
 
 import { someApiAction } from '../actions';
@@ -59,7 +67,7 @@ function SomeComponent ({ dispatch }) {
   const rm = new RM(dispatch);
 
   return (
-    <a onClick={ rm.dispatch(someApiAction()) }>Click me</a>
+    <a onClick={ () => { rm.dispatch(someApiAction()) } }>Click me</a>
   );
 }
 ```
@@ -74,7 +82,7 @@ This will call `dispatch` and simultaneously store a record of the request, befo
 
 Ensures that the action is only dispatched if it hasn't been before.
 
-```
+```js
 // Will only dispatch once
 [0, 1, 2].forEach(() => {
   rm.dispatchIfHaventAlready(apiAction())
@@ -90,7 +98,7 @@ Ensures that the action is only dispatched if it hasn't been before.
 
 Returns bool for whether the request has been made  in within the given cutoff (defaults to 40s), or the `requestThrottleSeconds` number passed in at initialization.
 
-```
+```js
 const rm = new RequestManager(dispatch, { requestThrottleSeconds: 5 });
 
 // True if it's been requested in last 5 seconds
@@ -101,7 +109,7 @@ rm.haveRequestedRecently(apiAction(number));
 
 Returns bool for whether the request has succeeded within the given cutoff (defaults to 300s), or the `freshnessCutoffSeconds` number passed in at initialization.
 
-```
+```js
 const rm = new RequestManager(dispatch, { freshenessCutoffSeconds: 120 });
 
 // True if it's succeeded in the last two minutes
@@ -112,7 +120,7 @@ rm.haveSucceededSinceCutoff(apiAction(number));
 
 Returns a flat array representing all actions dispatched.
 
-```
+```js
 // Defaults to logging the window.actionLogs object, but can be
 // given a different object, as well as a second arg which will be prepended
 // to each element in the flattened log
@@ -125,7 +133,7 @@ rm.flattenedLogs()
 
 Given a string object-notation path to the logging location  and a timestampt for that action, logs it to the `actionLogs` object.
 
-```
+```js
 // ie a log for a successful API hit for SOME_ACTION for user 36
 rm.writeLog('36.SOME_ACTION.SUCCESS', "2017-01-06T19:59:02.323Z");
 ```
@@ -134,7 +142,7 @@ rm.writeLog('36.SOME_ACTION.SUCCESS', "2017-01-06T19:59:02.323Z");
 
 Returns the timestamp for a given action, if found.
 
-```
+```js
 rm.findLog('36.SOME_ACTION.SUCCESS') // "2017-01-06T19:59:02.323Z"
 ```
 
