@@ -56,7 +56,7 @@ const writeABunchOfLogs = () => {
     { now: 'time3' }
   ));
   rm.writeLogFromAction(Object.assign(
-    fakeAction('internalAction', 'KIWIS'),
+    fakeAction(undefined, 'KIWIS'),
     { now: 'time4' }
   ));
   rm.writeLogFromAction({
@@ -72,12 +72,12 @@ describe('RequestManager', {
     generatesTheCorrectPathFromAnOutgoingAsyncAction: t => {
       resetWindowLogger();
       const path = rm._pathToLogFromAction(fakeAPIAction(46, 'APPLES'));
-      t.is(path, '46.APPLES.REQUEST');
+      t.is(path, 'APPLES.ID_46.REQUEST');
     },
     generatesTheCorrectPathFromAnOutgoingAsyncActionWithoutID: t => {
       resetWindowLogger();
       const path = rm._pathToLogFromAction(fakeAPIAction(undefined, 'BANANAS'));
-      t.is(path, 'GLOBAL.BANANAS.REQUEST');
+      t.is(path, 'BANANAS.GLOBAL.REQUEST');
     },
     generatesTheCorrectPathFromAnIncomingAsyncAction: t => {
       resetWindowLogger();
@@ -86,7 +86,7 @@ describe('RequestManager', {
         meta: { id: 46 },
         payload: { data: {} }
       });
-      t.is(path, '46.APPLES.SUCCESS');
+      t.is(path, 'APPLES.ID_46.SUCCESS');
     },
     generatesTheCorrectPathFromAnIncomingAsyncActionWithoutID: t => {
       resetWindowLogger();
@@ -94,17 +94,17 @@ describe('RequestManager', {
         type: 'BANANAS_SUCCESS',
         payload: { data: {} }
       });
-      t.is(path, 'GLOBAL.BANANAS.SUCCESS');
+      t.is(path, 'BANANAS.GLOBAL.SUCCESS');
     },
     generatesTheCorrectPathFromANormalActionWithAnID: t => {
       resetWindowLogger();
       const path = rm._pathToLogFromAction(fakeAction(36, 'MULTI_ARG'));
-      t.is(path, '36.MULTI_ARG.WHATEVER_WHATEVER2');
+      t.is(path, 'MULTI_ARG.ID_36.WHATEVER_WHATEVER2');
     },
     generatesTheCorrectPathFromANormalActionWithoutAnID: t => {
       resetWindowLogger();
       const path = rm._pathToLogFromAction(fakeAction(undefined, 'MULTI_ARG'));
-      t.is(path, 'GLOBAL.MULTI_ARG.WHATEVER_WHATEVER2');
+      t.is(path, 'MULTI_ARG.GLOBAL.WHATEVER_WHATEVER2');
     }
   },
 
@@ -117,7 +117,7 @@ describe('RequestManager', {
       ));
 
       assertObjectEquality(t, window.actionLogs, {
-        46: { SOME_ACTION: { REQUEST: 'time1' } }
+        SOME_ACTION: { ID_46: { REQUEST: 'time1' } }
       });
 
       rm.writeLogFromAction(Object.assign(
@@ -126,8 +126,10 @@ describe('RequestManager', {
       ));
 
       assertObjectEquality(t, window.actionLogs, {
-        46: { SOME_ACTION: { REQUEST: 'time1' } },
-        155: { SOME_ACTION: { REQUEST: 'time2' } }
+        SOME_ACTION: {
+          ID_46: { REQUEST: 'time1' },
+          ID_155: { REQUEST: 'time2' }
+        }
       });
 
       rm.writeLogFromAction(Object.assign(
@@ -136,9 +138,8 @@ describe('RequestManager', {
       ));
 
       assertObjectEquality(t, window.actionLogs, {
-        46: { SOME_ACTION: { REQUEST: 'time1' } },
-        155: { SOME_ACTION: { REQUEST: 'time2' } },
-        GLOBAL: { OTHER_ACTION: { REQUEST: 'time3' } }
+        SOME_ACTION: { ID_46: { REQUEST: 'time1' }, ID_155: { REQUEST: 'time2' } },
+        OTHER_ACTION: { GLOBAL: { REQUEST: 'time3' } }
       });
 
       rm.writeLogFromAction({
@@ -149,9 +150,8 @@ describe('RequestManager', {
       });
 
       assertObjectEquality(t, window.actionLogs, {
-        46: { SOME_ACTION: { REQUEST: 'time1', SUCCESS: 'time4' } },
-        155: { SOME_ACTION: { REQUEST: 'time2' } },
-        GLOBAL: { OTHER_ACTION: { REQUEST: 'time3' } }
+        SOME_ACTION: { ID_46: { REQUEST: 'time1', SUCCESS: 'time4' }, ID_155: { REQUEST: 'time2' } },
+        OTHER_ACTION: { GLOBAL: { REQUEST: 'time3' } }
       });
 
       rm.writeLogFromAction(Object.assign(
@@ -160,9 +160,16 @@ describe('RequestManager', {
       ));
 
       assertObjectEquality(t, window.actionLogs, {
-        46: { SOME_ACTION: { REQUEST: 'time1', SUCCESS: 'time4' } },
-        155: { SOME_ACTION: { REQUEST: 'time2' }, THIRD_ACTION: { VALUE_4_FINALVALUE: 'time5' } },
-        GLOBAL: { OTHER_ACTION: { REQUEST: 'time3' } }
+        SOME_ACTION: {
+          ID_46: { REQUEST: 'time1', SUCCESS: 'time4' },
+          ID_155: { REQUEST: 'time2' }
+        },
+        THIRD_ACTION: {
+          ID_155: { VALUE_4_FINALVALUE: 'time5' }
+        },
+        OTHER_ACTION: {
+          GLOBAL: { REQUEST: 'time3' }
+        }
       });
 
       rm.writeLogFromAction(Object.assign(
@@ -171,9 +178,19 @@ describe('RequestManager', {
       ));
 
       assertObjectEquality(t, window.actionLogs, {
-        46: { SOME_ACTION: { REQUEST: 'time1', SUCCESS: 'time4' } },
-        155: { SOME_ACTION: { REQUEST: 'time2' }, THIRD_ACTION: { VALUE_4_FINALVALUE: 'time5' } },
-        GLOBAL: { OTHER_ACTION: { REQUEST: 'time3' }, FOURTH_ACTION: { WHATEVER_WHATEVER2: 'time6' } }
+        SOME_ACTION: {
+          ID_46: { REQUEST: 'time1', SUCCESS: 'time4' },
+          ID_155: { REQUEST: 'time2' }
+        },
+        THIRD_ACTION: {
+          ID_155: { VALUE_4_FINALVALUE: 'time5' }
+        },
+        OTHER_ACTION: {
+          GLOBAL: { REQUEST: 'time3' }
+        },
+        FOURTH_ACTION: {
+          GLOBAL: { 'WHATEVER_WHATEVER2': 'time6' }
+        }
       });
     }
   },
@@ -201,7 +218,7 @@ describe('RequestManager', {
         'time3'
       );
       t.is(
-        rm.findLogFromAction(fakeAction('internalAction', 'KIWIS')),
+        rm.findLogFromAction(fakeAction(undefined, 'KIWIS')),
         'time4'
       );
       t.is(
@@ -228,12 +245,12 @@ describe('RequestManager', {
       t.deepEqual(
         rm.flattenedLogs().sort(),
         [
-          '1--APPLES--REQUEST--time1',
-          '2--APPLES--REQUEST--time2',
-          '2--APPLES--SUCCESS--time5',
-          '2--ORANGES--REQUEST--time2',
-          'GLOBAL--BANANAS--REQUEST--time3',
-          'INTERNALACTION--KIWIS--WHATEVER_WHATEVER2--time4'
+          "APPLES--ID_1--REQUEST--time1",
+          "APPLES--ID_2--REQUEST--time2",
+          "APPLES--ID_2--SUCCESS--time5",
+          "BANANAS--GLOBAL--REQUEST--time3",
+          "KIWIS--GLOBAL--WHATEVER_WHATEVER2--time4",
+          "ORANGES--ID_2--REQUEST--time2"
         ].sort()
       );
     }
@@ -248,11 +265,11 @@ describe('RequestManager', {
       t.is(returnVal, 'This reducer is for tracking alone and does not return viable data.'); // Ignores state
 
       const logsAfterFirst = window.actionLogs;
-      t.is(_.get(window.actionLogs, 'GLOBAL.GOOD.VALUE_VALUE2'), 'time')
+      t.is(_.get(window.actionLogs, 'GOOD.GLOBAL.VALUE_VALUE2'), 'time')
 
       reducer('irrelevant', { type: 'IGNORE_REQUEST', value: 'VALUE', value2: 'value2', now: 'time2' });
 
-      t.is(_.get(window.actionLogs, 'GLOBAL.IGNORE_REQUEST.VALUE_VALUE2'), undefined);
+      t.is(_.get(window.actionLogs, 'IGNORE_REQUEST.GLOBAL.VALUE_VALUE2'), undefined);
       t.deepEqual(logsAfterFirst, window.actionLogs);
     }
   }

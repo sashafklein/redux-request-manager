@@ -160,13 +160,15 @@ class RequestManager {
   }
 
   _asyncReturnPath(action, parsedType) {
-    const id = ((action.meta && action.meta.id && action.meta.id.toString()) || 'GLOBAL')
+    const actionID = action.meta && action.meta.id;
+    const id = actionID ? `ID_${actionID}` : 'GLOBAL'
                   .toString().toUpperCase();
-    return `${id}.${parsedType.base}.${parsedType.end}`;
+    return `${parsedType.base}.${id}.${parsedType.end}`;
   }
 
   _normalActionPath(action) {
-    const id = (action.siteID || action.id || 'GLOBAL').toString().toUpperCase();
+    const actionID = action.siteID || action.id;
+    const id = actionID ? `ID_${actionID}` : 'GLOBAL';
 
     // Add all printable args to log, for specificity
     const specifiers = Object.keys(action)
@@ -174,16 +176,17 @@ class RequestManager {
                   !['type', 'siteID', 'id', 'now'].includes(k))
       .map(s => action[s].toString().toUpperCase());
 
-    const base = [id, action.type].join('.');
+    const base = [action.type, id].join('.');
     return specifiers.length > 0 ? `${base}.${specifiers.join('_')}` : base;
   }
 
   _emittingAsyncPath(action) {
     const type = getResponseTypesFromAction(action)[0];
-    const id = (getIDFromAction(action) || 'GLOBAL').toString().toUpperCase();
+    const actionID = getIDFromAction(action);
+    const id = actionID ? `ID_${actionID}` : 'GLOBAL';
     const parsedType = parseActionType(type);
 
-    return `${id}.${parsedType.base}.${parsedType.end}`;
+    return `${parsedType.base}.${id}.${parsedType.end}`;
   }
 }
 

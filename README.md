@@ -7,25 +7,27 @@ Attaches a lightweight object to window which tracks request history as a tree a
 An example `window.actionLogs` object looks something like this:
 
 ```json
- {
-   "46": {
-     "SOME_ACTION": {
-       "REQUEST": "2016-10-06T23:38:46.637Z",
-     },
-     "OTHER_ACTION": {
-       "SPECIFYINGVALUE1_VALUE2": "2016-10-06T23:38:45.872Z",
-     }
-   },
-   "GLOBAL": {
-     "ACTION_WITHOUT_ID": {
-       "REQUEST": "2016-10-06T23:38:44.980Z",
-       "SUCCESS": "2016-10-06T23:38:45.776Z"
-     },
-     "NON_API_ACTION_WITHOUT_ID": {
-       "SPECIFIER1_SPECIFIER2": "2016-10-06T23:38:44.873Z"
-     }
-   }
- }
+{
+  "SOME_ACTION": {
+     "ID_46": { "REQUEST": "2016-10-06T23:38:46.637Z" },
+  },
+  "OTHER_ACTION": {
+    "ID_46": {
+     "SPECIFYINGVALUE1_VALUE2": "2016-10-06T23:38:45.872Z",
+    }
+  },
+  "ACTION_WITHOUT_ID": {
+    "GLOBAL": {
+      "REQUEST": "2016-10-06T23:38:44.980Z",
+      "SUCCESS": "2016-10-06T23:38:45.776Z"
+    }
+  },
+  "NON_API_ACTION_WITHOUT_ID": {
+    "GLOBAL: {
+      "SPECIFIER1_SPECIFIER2": "2016-10-06T23:38:44.873Z"
+    }
+  }
+}
 ```
 
 After the first request has been made with the manager, this object should be universally accessible, and all instances of the request manager will save to and perform checks on this global tree.
