@@ -2,6 +2,16 @@ import _ from 'lodash';
 import { CALL_API } from 'redux-api-middleware';
 import moment from 'moment';
 
+// Handle browsers running older versions of JS
+if (![].includes) {
+  Array.prototype.includes = (obj) => this.indexOf(obj) !== -1;
+};
+
+if (!''.includes) {
+  String.prototype.includes = (chars) => this.indexOf(chars) !== -1;
+};
+
+
 /** Turns a type string into an object of base and end
  * @param {String} type An FSAA action type (ie 'SOME_SUCCESS')
  * @return {Object} An object with 'base' and 'end' keys
