@@ -180,7 +180,7 @@ Like `writeLog`, but takes an action and infers the path. Takes timestamp from `
 
 ### findLogFromAction(action, specifiedEnd)
 
-Like `findLog`, but takes an action and action ending (ie `_REQUEST` or `_SUCCESS`), and finds the log for that event for that action.
+Like `findLog`, but takes an action and action ending (ie `'REQUEST'` or `'SUCCESS'`), and finds the log for that event for that action.
 
 ### pathToLogFromAction(action)
 
