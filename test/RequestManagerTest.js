@@ -68,20 +68,20 @@ const writeABunchOfLogs = () => {
 };
 
 describe('RequestManager', {
-  _pathToLogFromAction: {
+  pathToLogFromAction: {
     generatesTheCorrectPathFromAnOutgoingAsyncAction: t => {
       resetWindowLogger();
-      const path = rm._pathToLogFromAction(fakeAPIAction(46, 'APPLES'));
+      const path = rm.pathToLogFromAction(fakeAPIAction(46, 'APPLES'));
       t.is(path, 'APPLES.ID_46.REQUEST');
     },
     generatesTheCorrectPathFromAnOutgoingAsyncActionWithoutID: t => {
       resetWindowLogger();
-      const path = rm._pathToLogFromAction(fakeAPIAction(undefined, 'BANANAS'));
+      const path = rm.pathToLogFromAction(fakeAPIAction(undefined, 'BANANAS'));
       t.is(path, 'BANANAS.GLOBAL.REQUEST');
     },
     generatesTheCorrectPathFromAnIncomingAsyncAction: t => {
       resetWindowLogger();
-      const path = rm._pathToLogFromAction({
+      const path = rm.pathToLogFromAction({
         type: 'APPLES_SUCCESS',
         meta: { id: 46 },
         payload: { data: {} }
@@ -90,7 +90,7 @@ describe('RequestManager', {
     },
     generatesTheCorrectPathFromAnIncomingAsyncActionWithoutID: t => {
       resetWindowLogger();
-      const path = rm._pathToLogFromAction({
+      const path = rm.pathToLogFromAction({
         type: 'BANANAS_SUCCESS',
         payload: { data: {} }
       });
@@ -98,12 +98,12 @@ describe('RequestManager', {
     },
     generatesTheCorrectPathFromANormalActionWithAnID: t => {
       resetWindowLogger();
-      const path = rm._pathToLogFromAction(fakeAction(36, 'MULTI_ARG'));
+      const path = rm.pathToLogFromAction(fakeAction(36, 'MULTI_ARG'));
       t.is(path, 'MULTI_ARG.ID_36.WHATEVER_WHATEVER2');
     },
     generatesTheCorrectPathFromANormalActionWithoutAnID: t => {
       resetWindowLogger();
-      const path = rm._pathToLogFromAction(fakeAction(undefined, 'MULTI_ARG'));
+      const path = rm.pathToLogFromAction(fakeAction(undefined, 'MULTI_ARG'));
       t.is(path, 'MULTI_ARG.GLOBAL.WHATEVER_WHATEVER2');
     }
   },

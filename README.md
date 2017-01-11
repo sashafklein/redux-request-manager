@@ -1,5 +1,7 @@
 # Redux Request Manager
 
+[![CircleCI](https://circleci.com/gh/sashafklein/redux-request-manager.svg?style=svg)](https://circleci.com/gh/sashafklein/redux-request-manager)
+
 Attaches a lightweight object to window which tracks request history as a tree and provides a simple interface for tracking actions going out through redux-api-middleware or internally.
 
 > Event timestamps are stored as ISO strings, and request ids (or, if none exist, 'GLOBAL') as well as action argument values are nested in the tree.
@@ -179,6 +181,10 @@ Like `writeLog`, but takes an action and infers the path. Takes timestamp from `
 ### findLogFromAction(action, specifiedEnd)
 
 Like `findLog`, but takes an action and action ending (ie `_REQUEST` or `_SUCCESS`), and finds the log for that event for that action.
+
+### pathToLogFromAction(action)
+
+Given an action, returns the path to its timestamp in the `window.actionLogs` object. Takes synchronous actions, returning async actions, or emitting asyncActions (with an array of objects defining `type`). In this last case, it returns the path to the 'REQUEST' timestamp.
 
 ## Separate imports
 

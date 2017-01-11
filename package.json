@@ -1,6 +1,6 @@
 {
   "name": "redux-request-manager",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "A tool for storing a tree of redux request history and throttling requests",
   "author": "Sasha Klein",
   "repository": {

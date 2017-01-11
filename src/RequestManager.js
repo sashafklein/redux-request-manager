@@ -4,8 +4,7 @@ import moment from 'moment';
 
 import requestObjectCreator from './asyncRequestObject';
 
-const asyncRequestObject = requestObjectCreator;
-export asyncRequestObject;
+export const asyncRequestObject = requestObjectCreator;
 
 /** Turns a type string into an object of base and end
  * @param {String} type An FSAA action type (ie 'SOME_SUCCESS')
@@ -135,11 +134,11 @@ class RequestManager {
 
   writeLogFromAction(action) {
     const now = action.now || new Date().toISOString();
-    this.writeLog(this._pathToLogFromAction(action), now);
+    this.writeLog(this.pathToLogFromAction(action), now);
   }
 
   findLogFromAction(action, specifiedEnd) {
-    let path = this._pathToLogFromAction(action);
+    let path = this.pathToLogFromAction(action);
     if (specifiedEnd) {
       const array = path.split('.');
       array.pop();
@@ -148,10 +147,7 @@ class RequestManager {
     return this.findLog(path);
   }
 
-
-  // HELPERS //
-
-  _pathToLogFromAction(action) {
+  pathToLogFromAction(action) {
     if (action.type) { // Normal action, or returning async
       const parsedType = parseActionType(action.type);
       if (['REQUEST', 'SUCCESS', 'FAILURE'].includes(parsedType.end)) {
@@ -163,6 +159,9 @@ class RequestManager {
       return this._emittingAsyncPath(action);
     }
   }
+
+
+  // HELPERS //
 
   _asyncReturnPath(action, parsedType) {
     const actionID = action.meta && action.meta.id;
