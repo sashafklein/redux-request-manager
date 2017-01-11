@@ -2,6 +2,10 @@ import _ from 'lodash';
 import { CALL_API } from 'redux-api-middleware';
 import moment from 'moment';
 
+import asyncRequestObject from './asyncRequestObject';
+
+export asyncRequestObject;
+
 /** Turns a type string into an object of base and end
  * @param {String} type An FSAA action type (ie 'SOME_SUCCESS')
  * @return {Object} An object with 'base' and 'end' keys

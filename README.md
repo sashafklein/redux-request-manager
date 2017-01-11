@@ -23,7 +23,7 @@ An example `window.actionLogs` object looks something like this:
     }
   },
   "NON_API_ACTION_WITHOUT_ID": {
-    "GLOBAL: {
+    "GLOBAL": {
       "SPECIFIER1_SPECIFIER2": "2016-10-06T23:38:44.873Z"
     }
   }
@@ -33,6 +33,19 @@ An example `window.actionLogs` object looks something like this:
 After the first request has been made with the manager, this object should be universally accessible, and all instances of the request manager will save to and perform checks on this global tree.
 
 > This is obviously inherently insecure. If any of the information in an action is insecure, don't use it for those actions and ignore those actions in the reducer function. However, since this mostly just stores times of requests, the information is generally not a risk to expose.
+
+`redux-request-manager` grabs the ID to store in the tree from the `meta` information on an API action. For the below action, the manager would assume the ID is "some-id":
+
+```js
+{
+  [CALL_API]: {
+    types: [
+       { type: 'SOME_REQUEST', meta: { id: 'some-id' }, ... },
+       // ...
+    ]
+  }
+}
+```
 
 ## Getting started
 
@@ -51,7 +64,9 @@ import RequestManager from 'redux-request-manager';
 
 combineReducers({
   someReducer: reducerFunction,
-  rm: RM.actionTrackerReducer(['ARRAY', 'OF', 'ACTIONS', 'NOT', 'TO', 'BE', 'TRACKED'])
+  rm: RM.actionTrackerReducer([
+    'ARRAY', 'OF', 'ACTIONS', 'NOT', 'TO', 'BE', 'TRACKED'
+  ])
 })
 ```
 
@@ -67,9 +82,10 @@ import RM from 'redux-request-manager';
 
 function SomeComponent ({ dispatch }) {
   const rm = new RM(dispatch);
+  const onClick = () => { rm.dispatch(someApiAction()) };
 
   return (
-    <a onClick={ () => { rm.dispatch(someApiAction()) } }>Click me</a>
+    // Component here
   );
 }
 ```
@@ -159,3 +175,52 @@ Like `writeLog`, but takes an action and infers the path. Takes timestamp from `
 #### findLogFromAction(action, specifiedEnd)
 
 Like `findLog`, but takes an action and action ending (ie `_REQUEST` or `_SUCCESS`), and finds the log for that event for that action.
+
+### Separate imports
+
+Three additional helper methods are exported alongside the RequestManager class:
+
+#### Action creator functions
+
+##### asyncRequestObject
+
+Takes as type string base, an endpoint, and an options object, and returns an FSAA.
+
+```js
+import { asyncRequestObject } from 'redux-request-manager';
+
+const requestGithub = (owner, repo) => asyncActionObject(
+  'GITHUB_REPO',
+  `https://api.github.com/repos/${owner}/${repo}`,
+  {
+    meta: { id: repo } // Will be stored by RequestManager under this ID
+    // other keys include
+    // - headerAdditions (ContentType and Accept) pre-set
+    // - data object
+    // - method (defaults to 'GET')
+  }
+);
+
+// In a component -- sets whole react-api-middleware chain going
+dispatch(requestGithub('sashafklein', 'redux-request-manager'))
+```
+
+#### Action parser functions
+
+##### getResponseTypesFromAction(apiAction)
+
+Given an API action, returns an array of type strings.
+
+```js
+import { getResponseTypesFromAction } from 'redux-request-manager';
+const responseTypes = getResponseTypesFromAction(apiAction(1));
+responseTypes.map(type => type.split('_')[1]); // ['REQUEST', 'SUCCESS', 'FAILURE']
+```
+
+##### parseActionType(typeString)
+
+Given a type string, returns an object with its `base` and `end`.
+
+##### getIDFromAction(apiAction)
+
+Assuming an ID attached to the `meta` of the response, parses out that ID.
