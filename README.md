@@ -47,6 +47,8 @@ After the first request has been made with the manager, this object should be un
 }
 ```
 
+The [asyncRequestObject](#asyncrequestobject) function below simplifies the creation of actions with consumable meta content.
+
 ## Getting started
 
 ```
