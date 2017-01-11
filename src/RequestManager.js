@@ -2,8 +2,9 @@ import _ from 'lodash';
 import { CALL_API } from 'redux-api-middleware';
 import moment from 'moment';
 
-import asyncRequestObject from './asyncRequestObject';
+import requestObjectCreator from './asyncRequestObject';
 
+const asyncRequestObject = requestObjectCreator;
 export asyncRequestObject;
 
 /** Turns a type string into an object of base and end

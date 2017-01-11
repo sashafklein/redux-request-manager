@@ -32,9 +32,11 @@ An example `window.actionLogs` object looks something like this:
 
 After the first request has been made with the manager, this object should be universally accessible, and all instances of the request manager will save to and perform checks on this global tree.
 
-> This is obviously inherently insecure. If any of the information in an action is insecure, don't use it for those actions and ignore those actions in the reducer function. However, since this mostly just stores times of requests, the information is generally not a risk to expose.
+### Notes on usage
 
-`redux-request-manager` grabs the ID to store in the tree from the `meta` information on an API action. For the below action, the manager would assume the ID is "some-id":
+> This window-attached tree of request history is obviously inherently insecure. If a public history of which actions have been called when is not appropriate for your app, don't dispatch those actions from the manager, and [ignore them in the tracking reducer](#incorporating-the-requestmanager). However, since this mostly just stores times of requests, the information is generally not a risk to expose.
+
+Also note that `redux-request-manager` looks in the `meta` object of API requests/responses to determine which ID to store in the tree. For the below action, the manager would assume the ID is "some-id":
 
 ```js
 {
@@ -47,7 +49,7 @@ After the first request has been made with the manager, this object should be un
 }
 ```
 
-The [asyncRequestObject](#asyncrequestobject) function below simplifies the creation of actions with consumable meta content.
+For help producing a request object with meta information, this repo provides an [asyncRequestObject](#asyncrequestobject) helper function.
 
 ## Getting started
 
@@ -94,11 +96,11 @@ function SomeComponent ({ dispatch }) {
 
 This will call `dispatch` and simultaneously store a record of the request, before the redux store has been hit.
 
-## Other Methods
+# Other Methods
 
-### Primary Public API
+## Primary Public API
 
-#### dispatchIfHaventAlready(actionObj)
+### dispatchIfHaventAlready(actionObj)
 
 Ensures that the action is only dispatched if it hasn't been before.
 
@@ -114,7 +116,7 @@ Ensures that the action is only dispatched if it hasn't been before.
 })
 ```
 
-#### haventRequestedRecently(actionObj, secondsCutoff)
+### haventRequestedRecently(actionObj, secondsCutoff)
 
 Returns bool for whether the request has been made  in within the given cutoff (defaults to 40s), or the `requestThrottleSeconds` number passed in at initialization.
 
@@ -125,7 +127,7 @@ const rm = new RequestManager(dispatch, { requestThrottleSeconds: 5 });
 rm.haveRequestedRecently(apiAction(number));
 ```
 
-#### haveSucceededSinceCutoff(actionObj, secondsCutoff)
+### haveSucceededSinceCutoff(actionObj, secondsCutoff)
 
 Returns bool for whether the request has succeeded within the given cutoff (defaults to 300s), or the `freshnessCutoffSeconds` number passed in at initialization.
 
@@ -136,7 +138,7 @@ const rm = new RequestManager(dispatch, { freshenessCutoffSeconds: 120 });
 rm.haveSucceededSinceCutoff(apiAction(number));
 ```
 
-#### flattenedLogs(object)
+### flattenedLogs(object)
 
 Returns a flat array representing all actions dispatched.
 
@@ -147,9 +149,9 @@ Returns a flat array representing all actions dispatched.
 rm.flattenedLogs()
 ```
 
-### Path Logging Functions
+## Path Logging Functions
 
-#### writeLog(objectPath, timestamp)
+### writeLog(objectPath, timestamp)
 
 Given a string object-notation path to the logging location  and a timestampt for that action, logs it to the `actionLogs` object.
 
@@ -158,7 +160,7 @@ Given a string object-notation path to the logging location  and a timestampt fo
 rm.writeLog('36.SOME_ACTION.SUCCESS', "2017-01-06T19:59:02.323Z");
 ```
 
-#### findLog(objectPath)
+### findLog(objectPath)
 
 Returns the timestamp for a given action, if found.
 
@@ -166,25 +168,25 @@ Returns the timestamp for a given action, if found.
 rm.findLog('36.SOME_ACTION.SUCCESS') // "2017-01-06T19:59:02.323Z"
 ```
 
-#### removeLog(objectPath)
+### removeLog(objectPath)
 
 Deletes the log at the given path from the actionLogs object, erasing history of that request.
 
-#### writeLogFromAction(action)
+### writeLogFromAction(action)
 
 Like `writeLog`, but takes an action and infers the path. Takes timestamp from `action.now` or sets it to the current ISO string.
 
-#### findLogFromAction(action, specifiedEnd)
+### findLogFromAction(action, specifiedEnd)
 
 Like `findLog`, but takes an action and action ending (ie `_REQUEST` or `_SUCCESS`), and finds the log for that event for that action.
 
-### Separate imports
+## Separate imports
 
-Three additional helper methods are exported alongside the RequestManager class:
+Several additional helper methods are exported alongside the RequestManager class:
 
-#### Action creator functions
+### Action creator functions
 
-##### asyncRequestObject
+#### asyncRequestObject
 
 Takes as type string base, an endpoint, and an options object, and returns an FSAA.
 
@@ -207,9 +209,9 @@ const requestGithub = (owner, repo) => asyncActionObject(
 dispatch(requestGithub('sashafklein', 'redux-request-manager'))
 ```
 
-#### Action parser functions
+### Action parser functions
 
-##### getResponseTypesFromAction(apiAction)
+#### getResponseTypesFromAction(apiAction)
 
 Given an API action, returns an array of type strings.
 
@@ -219,10 +221,10 @@ const responseTypes = getResponseTypesFromAction(apiAction(1));
 responseTypes.map(type => type.split('_')[1]); // ['REQUEST', 'SUCCESS', 'FAILURE']
 ```
 
-##### parseActionType(typeString)
+#### parseActionType(typeString)
 
 Given a type string, returns an object with its `base` and `end`.
 
-##### getIDFromAction(apiAction)
+#### getIDFromAction(apiAction)
 
 Assuming an ID attached to the `meta` of the response, parses out that ID.
