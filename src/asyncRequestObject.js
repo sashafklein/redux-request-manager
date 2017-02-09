@@ -30,7 +30,7 @@ export default function asyncRequestObject (
     method = 'GET',
     headerAdditions = {},
     data
-  }
+  } = {}
 ) {
   const types = ['REQUEST', 'SUCCESS', 'FAILURE']
           .map(ending => [typeBase, ending].join('_'))
