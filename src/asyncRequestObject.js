@@ -29,7 +29,8 @@ export default function asyncRequestObject (
     meta = {},
     method = 'GET',
     headerAdditions = {},
-    data
+    data,
+    body
   } = {}
 ) {
   const types = ['REQUEST', 'SUCCESS', 'FAILURE']
@@ -45,7 +46,10 @@ export default function asyncRequestObject (
       'Content-Type': 'application/json'
     }, headerAdditions)
   };
-  if (data) { object.body = data; }
+
+  const dataObj = data || body;
+
+  if (dataObj) { object.body = JSON.stringify(dataObj); }
 
   return {
     [CALL_API]: object
