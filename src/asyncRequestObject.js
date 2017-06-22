@@ -9,13 +9,16 @@ const addArgToResponse = (responseType, endpoint, metaInfo = {}) => {
 
       const contentType = res.headers.get('Content-Type');
 
-      // Ensure res.json() does not raise an error
-      if (!(contentType && ~contentType.indexOf('json'))) {
-        throw new Error('Invalid object received. Expected JSON.');
-      }
+      // JSON response
+      if (contentType && contentType.indexOf('json') >= 0) {
+        return res.json()
+          .then(json => Object.assign(metaInfo, json));
 
-      return res.json()
-        .then(json => Object.assign(metaInfo, json));
+      // Non-JSON response
+      } else {
+        return res.text()
+          .then(text => Object.assign(metaInfo, { status: res.status }, text ? { text } : {}));
+      }
     }
   };
 
